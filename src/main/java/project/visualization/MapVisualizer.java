@@ -1,5 +1,8 @@
-package project;
+package project.visualization;
 
+
+import project.orientation.Vector2d;
+import project.maps.IWorldMap;
 
 /**
  * The map visualizer converts the {@link IWorldMap} map into a string

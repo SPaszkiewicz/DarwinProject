@@ -1,6 +1,6 @@
-package project;
+package project.orientation;
 
-enum MapDirection {
+public enum MapDirection {
     NORTH,
     NORTHEAST,
     EAST,

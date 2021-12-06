@@ -1,6 +1,9 @@
 package project;
 
 import org.junit.jupiter.api.Test;
+import project.orientation.MapDirection;
+import project.orientation.Vector2d;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class MapDirectionTest {

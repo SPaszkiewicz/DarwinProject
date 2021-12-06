@@ -1,4 +1,4 @@
-package project;
+package project.orientation;
 
 public enum MoveDirection
 {

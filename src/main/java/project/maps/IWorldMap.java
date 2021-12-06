@@ -1,4 +1,7 @@
-package project;
+package project.maps;
+
+import project.elements.Animal;
+import project.orientation.Vector2d;
 
 public interface IWorldMap {
     /**
@@ -41,4 +44,10 @@ public interface IWorldMap {
 
 
     Vector2d WhereToMoveTo(Vector2d position);
+
+    Vector2d getEmptyLocation();
+
+    void grassEaten(Vector2d position);
+
+    void addGrass();
 }
