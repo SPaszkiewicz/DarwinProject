@@ -2,10 +2,7 @@ package project.simulation;
 
 import project.Generate;
 import project.elements.Animal;
-import project.elements.Grass;
 import project.maps.IWorldMap;
-
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class SimulationEngine implements IEngine
@@ -34,13 +31,19 @@ public class SimulationEngine implements IEngine
     {
         int i = 0;
         System.out.println(this.map);
-        while (i < 10) {
+        LinkedList<Animal> deadAnimals;
+        while (i < 50) {
+            deadAnimals = map.executeDeath();
+            System.out.println(this.map);
+            for (Animal animal: deadAnimals)
+            {
+                animalList.remove(animal);
+            }
             for (Animal animal: animalList)
             {
-                animal.rotate();
                 animal.move();
             }
-            System.out.println(this.map);
+            map.grassEatingTime();
             i += 1;
         }
     }

@@ -6,14 +6,13 @@ import project.orientation.Vector2d;
 
 public class LeftMap extends  AbstractWorldMap
 {
-    public LeftMap(Vector2d left, Vector2d right)
-    {
-        super(left, right);
+    public LeftMap(Vector2d mapLeftSize, Vector2d mapRightSize, int startEnergy, int moveEnergy, int plantEnergy, float jungleRatio, int rotateEnergy,int breedEnergy) {
+        super(mapLeftSize, mapRightSize, startEnergy, moveEnergy, plantEnergy, jungleRatio, rotateEnergy, breedEnergy);
         setDrawer(new MapVisualizer(this));
     }
 
     @Override
-    public Vector2d WhereToMoveTo(Vector2d position)
+    public Vector2d whereToMoveTo(Vector2d position)
     {
         if (position.follows(mapLeftSize) && position.precedes(mapRightSize))
             return position;
@@ -32,7 +31,7 @@ public class LeftMap extends  AbstractWorldMap
         }
     }
 
-    public void addGrass() //TODO PEWNIE DA SIE LEPIEJ
+    public void addGrass()
     {
         addElement(new Grass(getEmptyLocation(),this));
     }

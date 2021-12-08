@@ -7,19 +7,18 @@ import project.visualization.MapVisualizer;
 public class RightMap  extends  AbstractWorldMap
 {
 
-    public RightMap(Vector2d mapLeftSize, Vector2d mapRightSize)
-    {
-        super(mapLeftSize, mapRightSize);
+    public RightMap(Vector2d mapLeftSize, Vector2d mapRightSize, int startEnergy, int moveEnergy, int plantEnergy, float jungleRatio, int rotateEnergy, int breedEnergy) {
+        super(mapLeftSize, mapRightSize, startEnergy, moveEnergy, plantEnergy, jungleRatio, rotateEnergy, breedEnergy);
         setDrawer(new MapVisualizer(this));
     }
 
     @Override
-    public Vector2d WhereToMoveTo(Vector2d position) {
+    public Vector2d whereToMoveTo(Vector2d position) {
         return position;
     }
 
     @Override
-    public void addGrass() //TODO PEWNIE DA SIE LEPIEJ
+    public void addGrass()
     {
         addElement(new Grass(getEmptyLocation(),this));
     }

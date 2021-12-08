@@ -38,12 +38,5 @@ abstract class AbstractWorldElem implements IMapElement
         this.observers.remove(observer);
     }
 
-    public void positionChanged(Vector2d oldVector, Vector2d newVector)
-    {
-        for (IPositionChangeObserver observer: observers)
-        {
-            observer.positionChanged(oldVector, newVector);
-        }
-    }
 
 }

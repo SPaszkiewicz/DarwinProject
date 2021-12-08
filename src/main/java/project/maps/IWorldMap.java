@@ -3,6 +3,8 @@ package project.maps;
 import project.elements.Animal;
 import project.orientation.Vector2d;
 
+import java.util.LinkedList;
+
 public interface IWorldMap {
     /**
      * Indicate if any object can move to the given position.
@@ -43,11 +45,19 @@ public interface IWorldMap {
     Object objectAt(Vector2d position);
 
 
-    Vector2d WhereToMoveTo(Vector2d position);
+    Vector2d whereToMoveTo(Vector2d position);
 
     Vector2d getEmptyLocation();
 
-    void grassEaten(Vector2d position);
+    void grassEatingTime();
+
+    LinkedList<Animal> executeDeath();
 
     void addGrass();
+
+    int getMoveEnergy();
+
+    int getRotateEnergy();
+
+    void breeding();
 }

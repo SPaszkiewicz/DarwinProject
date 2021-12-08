@@ -4,8 +4,6 @@ import project.*;
 import project.orientation.*;
 import project.maps.IWorldMap;
 
-import java.util.Arrays;
-
 
 public class Animal extends AbstractWorldElem
 {
@@ -21,6 +19,15 @@ public class Animal extends AbstractWorldElem
         this.energy = energy;
     }
 
+    public int getEnergy() {
+        return energy;
+    }
+
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+
     @Override
     public String toString() {
         return Integer.toString(energy);
@@ -30,9 +37,18 @@ public class Animal extends AbstractWorldElem
         return direction;
     }
 
-    public void rotate()
+    public void positionChanged(Vector2d oldVector, Vector2d newVector)
     {
-        switch (this.chooseDirection())
+        for (IPositionChangeObserver observer: observers)
+        {
+            observer.positionChanged(oldVector, newVector, this);
+        }
+    }
+
+    public MoveDirection rotate()
+    {
+        MoveDirection rotation = this.chooseDirection();
+        switch (rotation)
         {
             case LIT_RIGHT:
             {
@@ -66,25 +82,33 @@ public class Animal extends AbstractWorldElem
                 break;
             default: break;
         }
+        return rotation;
     }
-
+    public void reportDeadPossibility(Vector2d position)
+    {
+        for (IPositionChangeObserver observer: observers)
+        {
+            observer.reportPossibleDeath(position, this);
+        }
+    }
     public void move()
     {
-        Vector2d newPosition = map.WhereToMoveTo(this.position.add(direction.toUnitVector()));
-        if (map.canMoveTo(newPosition))
+
+        Vector2d newPosition = map.whereToMoveTo(this.position.add(direction.toUnitVector()));
+        MoveDirection rotation = this.rotate();
+        if (map.canMoveTo(newPosition) && (rotation == MoveDirection.FORWARD))
         {
-            if (map.objectAt(newPosition) instanceof Grass) // JEDZENIE TRAWY
-            {
-                this.energy += 1; //TODO ZMIANA O ILE KTO CHCE
-                map.grassEaten(newPosition);
-            }
+            this.energy = this.energy - this.map.getMoveEnergy();
             positionChanged(this.position, newPosition);
             this.position = newPosition;
         }
+        else if (rotation != MoveDirection.FORWARD)this.energy = this.energy - this.map.getRotateEnergy();
+
+        if (this.energy <= 0) this.reportDeadPossibility(this.position);
     }
 
     public MoveDirection chooseDirection()
     {
-        return this.gen[Generate.RandInt(0, 31)];
+        return this.gen[Generate.randInt(0, 31)];
     }
 }

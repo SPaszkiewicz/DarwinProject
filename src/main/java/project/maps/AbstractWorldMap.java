@@ -1,47 +1,107 @@
 package project.maps;
 
 import project.*;
+import project.elements.DeathNote;
 import project.orientation.Vector2d;
 import project.elements.Animal;
 import project.elements.Grass;
 import project.elements.IMapElement;
 import project.visualization.MapVisualizer;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
 {
+    // POLA
     protected MapVisualizer drawer;
-    protected Vector2d mapLeftSize;
-    protected Vector2d mapRightSize;
-    protected LinkedHashMap<Vector2d, IMapElement> elemPosition = new LinkedHashMap<>();
-    protected void setDrawer(MapVisualizer drawer) {
-        this.drawer = drawer;
-    }
+    protected final Vector2d mapLeftSize;
+    protected final Vector2d mapRightSize;
+    protected final int startEnergy;
+    protected final int moveEnergy;
+    protected final int plantEnergy;
+    protected final float jungleRatio;
+    protected final int rotateEnergy;
+    protected final int breedEnergy;
+    protected final LinkedHashMap<Vector2d, Field> fieldPosition = new LinkedHashMap<>();
+    protected final LinkedList<Vector2d> consumePosition = new LinkedList<>();
+    protected final LinkedList<DeathNote>  deathReportList = new LinkedList<>();
+    protected final LinkedList<Animal>  breedingList = new LinkedList<>();
 
-    public AbstractWorldMap(Vector2d mapLeftSize, Vector2d mapRightSize)
+
+    // KONSTRUKTOR
+
+    public AbstractWorldMap(Vector2d mapLeftSize, Vector2d mapRightSize, int startEnergy, int moveEnergy, int plantEnergy, float jungleRatio, int rotateEnergy, int breedEnergy)
     {
         this.mapLeftSize = mapLeftSize;
         this.mapRightSize = mapRightSize;
+        this.startEnergy = startEnergy;
+        this.moveEnergy = moveEnergy;
+        this.rotateEnergy = rotateEnergy;
+        this.plantEnergy = plantEnergy;
+        this.jungleRatio = jungleRatio;
+        this.breedEnergy = breedEnergy;
+    }
+    // OBSLUGA POL
+    public void removeEmptyField(Vector2d position)
+    {
+        if (fieldPosition.get(position).isFieldEmpty() && !fieldPosition.get(position).getIsGrass()) fieldPosition.remove(position);
     }
 
-    @Override
-    public void positionChanged(Vector2d oldPosition, Vector2d newPosition)
+    public void addElement(IMapElement element)
     {
-        IMapElement element = elemPosition.get(oldPosition);
-        if (element instanceof Animal)
+        if (!fieldPosition.containsKey(element.getPosition())) fieldPosition.put(element.getPosition(), new Field(false, this, element.getPosition()));
+        if (element instanceof Grass)   fieldPosition.get(element.getPosition()).setGrass(true);
+        else
         {
-
-            elemPosition.remove(oldPosition);
-            elemPosition.put(newPosition,(Animal) element);
-
+            fieldPosition.get(element.getPosition()).addToField(element);
+            element.addObserver(this);
         }
+    }
+
+    public Vector2d getEmptyLocation()
+    {
+        Vector2d position = new Vector2d(Generate.randInt(this.mapLeftSize.getX(), this.mapRightSize.getX()),
+                Generate.randInt(this.mapLeftSize.getY(), this.mapRightSize.getY()));
+        while (this.fieldPosition.containsKey(position))
+        {
+            position = new Vector2d(Generate.randInt(this.mapLeftSize.getX(), this.mapRightSize.getX()),
+                    Generate.randInt(this.mapLeftSize.getY(), this.mapRightSize.getY()));
+        }
+        return position;
+    }
+
+    public int getStartEnergy() {
+        return startEnergy;
+    }
+
+    public int getMoveEnergy() {
+        return moveEnergy;
+    }
+
+    public int getPlantEnergy() {
+        return plantEnergy;
+    }
+
+    public float getJungleRatio() {
+        return jungleRatio;
+    }
+
+    public int getRotateEnergy() {
+        return rotateEnergy;
+    }
+
+    // NATYWNE OPERACJE
+    protected void setDrawer(MapVisualizer drawer) {
+        this.drawer = drawer;
     }
 
     public String toString()
     {
         return drawer.draw(this.mapLeftSize, this.mapRightSize);
     }
+
 
     @Override
     public boolean place(Animal animal) throws IllegalArgumentException
@@ -60,48 +120,85 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
     @Override
     public boolean canMoveTo(Vector2d position)
     {
-        return !(objectAt(position) instanceof Animal);
-    }
+        return true;
+    } // TODO UPOSLEDZONE TO JEST TERAZ
 
     @Override
     public boolean isOccupied(Vector2d position) {
-        return elemPosition.containsKey(position);
+        return fieldPosition.containsKey(position);
     }
 
     @Override
     public Object objectAt(Vector2d position)
     {
-        if (elemPosition.containsKey(position))
-        {
-            if (elemPosition.get(position) instanceof  Animal) return (Animal) elemPosition.get(position);
-            if (elemPosition.get(position) instanceof Grass) return (Grass) elemPosition.get(position);
-        }
+        if (fieldPosition.containsKey(position)) return fieldPosition.get(position).getRepresentative();
         return null;
     }
 
-    public void addElement(IMapElement element)
+    // OBSERWATOR
+    @Override
+    public void positionChanged(Vector2d oldPosition, Vector2d newPosition, IMapElement element)
     {
-        elemPosition.put(element.getPosition(), element);
-        element.addObserver(this);
-    }
-
-    public void grassEaten(Vector2d position)
-    {
-        Grass grass = (Grass) elemPosition.get(position);
-        grass.removeObserver(this);
-        elemPosition.remove(position);
-
-    }
-
-    public Vector2d getEmptyLocation()
-    {
-        Vector2d position = new Vector2d(Generate.RandInt(this.mapLeftSize.getX(), this.mapRightSize.getX()),
-                                         Generate.RandInt(this.mapLeftSize.getY(), this.mapRightSize.getY()));
-        while (this.elemPosition.containsKey(position))
+        if (element instanceof Animal)
         {
-            position = new Vector2d(Generate.RandInt(this.mapLeftSize.getX(), this.mapRightSize.getX()),
-                                             Generate.RandInt(this.mapLeftSize.getY(), this.mapRightSize.getY()));
+
+            fieldPosition.get(oldPosition).RemoveFromField(element);
+            removeEmptyField(oldPosition);
+            if (!fieldPosition.containsKey(newPosition)) fieldPosition.put(newPosition, new Field(false, this, newPosition));
+            if (fieldPosition.get(newPosition).getIsGrass()) this.consumePosition.add(newPosition); // Do konsumpcji trawy
+            Animal animal = (Animal) element;
+            if (animal.getEnergy() >= this.breedEnergy && !fieldPosition.get(newPosition).isFieldEmpty()) breedingList.add(animal);
+            fieldPosition.get(newPosition).addToField(element);
         }
-        return position;
     }
+
+    public void reportPossibleDeath(Vector2d position, Animal animal)
+    {
+        deathReportList.add(new DeathNote(animal, position));
+    }
+
+    // EVENTY
+    public void grassEatingTime()
+    {
+        ArrayList<Animal> eatingAnimals;
+        for (Vector2d position: consumePosition)
+        {
+            fieldPosition.get(position).removeGrass();
+            eatingAnimals = fieldPosition.get(position).getEatingAnimals();
+            int food = plantEnergy/eatingAnimals.size(); // Resztki rozdeptane
+            for (Animal animal : eatingAnimals)
+            {
+                animal.setEnergy(animal.getEnergy() + food);
+            }
+        }
+        consumePosition.clear();
+    }
+
+    public LinkedList<Animal> executeDeath()
+    {
+        LinkedList<Animal> deadAnimals = new LinkedList<>();
+        for (DeathNote dead : deathReportList)
+        {
+            if (dead.animal.getEnergy() <= 0)
+            {
+                fieldPosition.get(dead.position).RemoveFromField(dead.animal);
+                removeEmptyField(dead.position);
+                deadAnimals.add(dead.animal);
+            }
+        }
+        deathReportList.clear();
+        return  deadAnimals;
+    }
+
+    public void breeding()
+    {
+        Vector2d position;
+        for (Animal animal: breedingList)
+        {
+            position = animal.getPosition();
+
+        }
+
+    }
+
 }
