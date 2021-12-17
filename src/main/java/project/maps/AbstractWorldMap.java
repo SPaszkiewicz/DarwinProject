@@ -14,26 +14,32 @@ import java.util.LinkedList;
 
 abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
 {
-    // POLA
+    // POLA PODSTAWOWE
     protected MapVisualizer drawer;
     protected final Vector2d mapLeftSize;
     protected final Vector2d mapRightSize;
+    protected final LinkedHashMap<Vector2d, Field> fieldPosition = new LinkedHashMap<>();
+    protected final LinkedList<Vector2d> consumePosition = new LinkedList<>();
+    protected final LinkedList<DeathNote>  deathReportList = new LinkedList<>();
+    protected final IRegion jungle;
+    protected final IRegion steppe;
+
+    //POLA WEJSCIOWE
     protected final int startEnergy;
     protected final int moveEnergy;
     protected final int plantEnergy;
     protected final float jungleRatio;
     protected final int rotateEnergy;
     protected final int breedEnergy;
-    protected final LinkedHashMap<Vector2d, Field> fieldPosition = new LinkedHashMap<>();
-    protected final LinkedList<Vector2d> consumePosition = new LinkedList<>();
-    protected final LinkedList<DeathNote>  deathReportList = new LinkedList<>();
-    protected final LinkedList<Animal>  breedingList = new LinkedList<>();
 
+    //POLA NA STATYSTYKI
+    protected int amountOfGrass = 0;
 
     // KONSTRUKTOR
 
-    public AbstractWorldMap(Vector2d mapLeftSize, Vector2d mapRightSize, int startEnergy, int moveEnergy, int plantEnergy, float jungleRatio, int rotateEnergy, int breedEnergy)
+    public AbstractWorldMap(Vector2d mapLeftSize, Vector2d mapRightSize, int startEnergy, int moveEnergy, int plantEnergy, float jungleRatio, int rotateEnergy)
     {
+
         this.mapLeftSize = mapLeftSize;
         this.mapRightSize = mapRightSize;
         this.startEnergy = startEnergy;
@@ -41,12 +47,30 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
         this.rotateEnergy = rotateEnergy;
         this.plantEnergy = plantEnergy;
         this.jungleRatio = jungleRatio;
-        this.breedEnergy = breedEnergy;
+        this.breedEnergy = startEnergy/2;
+
+        int jungleSizeX = (int) ((mapRightSize.getX() - mapLeftSize.getX()) * jungleRatio);
+        int jungleSizeY = (int) ((mapRightSize.getY() - mapLeftSize.getY()) * jungleRatio);
+        Vector2d jungleStart = new Vector2d((mapRightSize.getX() - mapLeftSize.getX()-jungleSizeX)/2, (mapRightSize.getY() - mapLeftSize.getY() - jungleSizeY)/2);
+        Vector2d jungleEnd = new Vector2d(jungleStart.getX() + jungleSizeX, jungleStart.getY() + jungleSizeY);
+        this.jungle = new Jungle(jungleStart, jungleEnd, this);
+        this.steppe = new Steppe(jungleStart, jungleEnd, this, mapLeftSize, mapRightSize);
+
     }
     // OBSLUGA POL
     public void removeEmptyField(Vector2d position)
     {
         if (fieldPosition.get(position).isFieldEmpty() && !fieldPosition.get(position).getIsGrass()) fieldPosition.remove(position);
+    }
+
+    protected void setJungleMap(IWorldMap map)
+    {
+        jungle.setMap(map);
+    }
+
+    protected void setSteppeMap(IWorldMap map)
+    {
+        steppe.setMap(map);
     }
 
     public void addElement(IMapElement element)
@@ -60,33 +84,36 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
         }
     }
 
-    public Vector2d getEmptyLocation()
+    public boolean isInJungle(Vector2d position)
     {
-        Vector2d position = new Vector2d(Generate.randInt(this.mapLeftSize.getX(), this.mapRightSize.getX()),
-                Generate.randInt(this.mapLeftSize.getY(), this.mapRightSize.getY()));
-        while (this.fieldPosition.containsKey(position))
-        {
-            position = new Vector2d(Generate.randInt(this.mapLeftSize.getX(), this.mapRightSize.getX()),
-                    Generate.randInt(this.mapLeftSize.getY(), this.mapRightSize.getY()));
-        }
-        return position;
+     return this.jungle.inRegion(position);
     }
 
-    public int getStartEnergy() {
-        return startEnergy;
+    public Vector2d getEmptyLocation()
+    {
+        ArrayList<Vector2d> consideredVectors = new ArrayList<>();
+        for (int i = mapLeftSize.getX(); i < mapRightSize.getX()+1; i += 1)
+        {
+            for (int j = mapLeftSize.getY(); j < mapRightSize.getY()+1; j += 1)
+            {
+                if (!this.isOccupied(new Vector2d(i, j))) consideredVectors.add(new Vector2d(i, j));
+            }
+        }
+        if (consideredVectors.size() > 0) return consideredVectors.get(Generate.randInt(0, consideredVectors.size()-1));
+        else return new Vector2d(-1, -1);
     }
+
+    public Vector2d getMapRightSize() {
+        return mapRightSize;
+    }
+
+    public int getAmountOfGrass() {return amountOfGrass;}
+
 
     public int getMoveEnergy() {
         return moveEnergy;
     }
 
-    public int getPlantEnergy() {
-        return plantEnergy;
-    }
-
-    public float getJungleRatio() {
-        return jungleRatio;
-    }
 
     public int getRotateEnergy() {
         return rotateEnergy;
@@ -121,7 +148,7 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
     public boolean canMoveTo(Vector2d position)
     {
         return true;
-    } // TODO UPOSLEDZONE TO JEST TERAZ
+    }
 
     @Override
     public boolean isOccupied(Vector2d position) {
@@ -141,13 +168,10 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
     {
         if (element instanceof Animal)
         {
-
             fieldPosition.get(oldPosition).RemoveFromField(element);
             removeEmptyField(oldPosition);
             if (!fieldPosition.containsKey(newPosition)) fieldPosition.put(newPosition, new Field(false, this, newPosition));
-            if (fieldPosition.get(newPosition).getIsGrass()) this.consumePosition.add(newPosition); // Do konsumpcji trawy
-            Animal animal = (Animal) element;
-            if (animal.getEnergy() >= this.breedEnergy && !fieldPosition.get(newPosition).isFieldEmpty()) breedingList.add(animal);
+            if (fieldPosition.get(newPosition).getIsGrass() && !consumePosition.contains(newPosition)) this.consumePosition.add(newPosition); // Do konsumpcji trawy
             fieldPosition.get(newPosition).addToField(element);
         }
     }
@@ -170,6 +194,7 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
             {
                 animal.setEnergy(animal.getEnergy() + food);
             }
+            amountOfGrass -= 1;
         }
         consumePosition.clear();
     }
@@ -188,17 +213,6 @@ abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver
         }
         deathReportList.clear();
         return  deadAnimals;
-    }
-
-    public void breeding()
-    {
-        Vector2d position;
-        for (Animal animal: breedingList)
-        {
-            position = animal.getPosition();
-
-        }
-
     }
 
 }

@@ -1,10 +1,17 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
 }
 
 application {
-    mainClassName = 'Project.Main'
+    mainClassName = 'project.frontend.App'
+}
+
+
+javafx {
+    version = "11.0.2"
+    modules = [ 'javafx.controls' ]
 }
 
 group 'org.example'

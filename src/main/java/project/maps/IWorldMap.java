@@ -3,6 +3,7 @@ package project.maps;
 import project.elements.Animal;
 import project.orientation.Vector2d;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public interface IWorldMap {
@@ -53,11 +54,19 @@ public interface IWorldMap {
 
     LinkedList<Animal> executeDeath();
 
-    void addGrass();
+    void addGrassToJungle();
+
+    void addGrassToSteppe();
 
     int getMoveEnergy();
 
     int getRotateEnergy();
 
-    void breeding();
+    ArrayList<Animal> breeding();
+
+    int getAmountOfGrass();
+
+    Vector2d getMapRightSize();
+
+    boolean isInJungle(Vector2d position);
 }

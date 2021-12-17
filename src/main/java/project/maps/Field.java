@@ -21,6 +21,14 @@ public class Field
         this.position = position;
     }
 
+    public ArrayList<IMapElement> getElementsOnField() {
+        return elementsOnField;
+    }
+
+    public Vector2d getPosition() {
+        return position;
+    }
+
     public boolean getIsGrass() {
         return isGrass;
     }
@@ -64,6 +72,34 @@ public class Field
         }
         return animal;
     }
+
+    public Animal[] getForBreed()
+    {
+        Animal max1 = (Animal) elementsOnField.get(0);
+        Animal max2 = (Animal) elementsOnField.get(1);
+        Animal temp;
+        if (max1.getEnergy() < max2.getEnergy())
+        {
+            temp = max1;
+            max1 = max2;
+            max2 = temp;
+        }
+        for (int i = 2; i < elementsOnField.size(); i+=1)
+        {
+            temp = (Animal) elementsOnField.get(i);
+            if (max1.getEnergy() < temp.getEnergy())
+            {
+                max2 = max1;
+                max1 = temp;
+            }
+            else if (max2.getEnergy() < temp.getEnergy())
+            {
+                max2 = temp;
+            }
+        }
+        return new Animal[]{max1, max2};
+    }
+
 
     public void removeGrass()
     {

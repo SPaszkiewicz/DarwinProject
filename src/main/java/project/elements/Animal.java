@@ -10,13 +10,30 @@ public class Animal extends AbstractWorldElem
     private MapDirection direction;
     private int energy;
     private final MoveDirection[] gen;
-
-    public Animal(Vector2d position, IWorldMap map, MapDirection direction, int[] gen, int energy)
+    private int dayLiving = 0;
+    private int breedAmount = 0;
+    public Animal(Vector2d position, IWorldMap map, MapDirection direction, MoveDirection[] gen, int energy)
     {
         super(position, map);
         this.direction = direction;
-        this.gen = DirectionParser.toDirection(gen);
+        this.gen = gen;
         this.energy = energy;
+    }
+
+    public int getDayLiving() {
+        return dayLiving;
+    }
+
+    public int getBreedAmount() {
+        return breedAmount;
+    }
+
+    public void setBreedAmount(int breedAmount) {
+        this.breedAmount = breedAmount;
+    }
+
+    public MoveDirection[] getGen() {
+        return gen;
     }
 
     public int getEnergy() {
@@ -93,7 +110,7 @@ public class Animal extends AbstractWorldElem
     }
     public void move()
     {
-
+        dayLiving += 1;
         Vector2d newPosition = map.whereToMoveTo(this.position.add(direction.toUnitVector()));
         MoveDirection rotation = this.rotate();
         if (map.canMoveTo(newPosition) && (rotation == MoveDirection.FORWARD))
