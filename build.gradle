@@ -22,6 +22,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.jumpmind.symmetric:symmetric-csv:3.5.19'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }

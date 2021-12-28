@@ -1,6 +1,7 @@
 package project;
 
 import project.elements.Animal;
+import project.elements.DirectionParser;
 import project.maps.IWorldMap;
 import project.orientation.MapDirection;
 import project.orientation.MoveDirection;
@@ -47,9 +48,14 @@ public class Generate {
     public static Animal createAnimal(IWorldMap map, int energy) {
         Vector2d postion = map.getEmptyLocation();
         if (!postion.equals(new Vector2d(-1,-1)))
-            return new Animal(map.getEmptyLocation(), map, MapDirection.NORTH, DirectionParser.toDirection(gens()), energy);
+            return new Animal(map.getEmptyLocation(), map, randomDirection(), DirectionParser.toDirection(gens()), energy);
         else
-            return new Animal(map.getEmptyLocation(), map, MapDirection.NORTH, DirectionParser.toDirection(gens()), -1);
+            return new Animal(map.getEmptyLocation(), map, randomDirection(), DirectionParser.toDirection(gens()), -1);
+    }
+
+    public static Animal magicAnimal(IWorldMap map, int energy, Vector2d position, MoveDirection[] genes)
+    {
+        return new Animal(position, map, randomDirection(), genes, energy);
     }
 
     public static MapDirection randomDirection() // Sposob losowania wziety z stack overflow

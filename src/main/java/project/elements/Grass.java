@@ -1,6 +1,5 @@
 package project.elements;
 
-import project.IPositionChangeObserver;
 import project.orientation.Vector2d;
 import project.maps.IWorldMap;
 

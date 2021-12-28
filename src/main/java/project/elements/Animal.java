@@ -1,8 +1,11 @@
 package project.elements;
 
 import project.*;
+import project.maps.IPositionChangeObserver;
 import project.orientation.*;
 import project.maps.IWorldMap;
+
+import static project.orientation.MoveDirection.*;
 
 
 public class Animal extends AbstractWorldElem
@@ -12,12 +15,45 @@ public class Animal extends AbstractWorldElem
     private final MoveDirection[] gen;
     private int dayLiving = 0;
     private int breedAmount = 0;
+    private boolean isDescendant = false;
+    private final int[] dominants = {0, 0, 0, 0, 0, 0, 0, 0};
     public Animal(Vector2d position, IWorldMap map, MapDirection direction, MoveDirection[] gen, int energy)
     {
         super(position, map);
         this.direction = direction;
         this.gen = gen;
+        countDominants();
         this.energy = energy;
+    }
+
+    public int[] getDominants() {
+        return dominants;
+    }
+
+    public void countDominants()
+    {
+        for(MoveDirection move : this.gen)
+        {
+            switch (move)
+            {
+                case FORWARD: this.dominants[0] += 1; break;
+                case LIT_RIGHT: this.dominants[1] += 1; break;
+                case RIGHT: this.dominants[2] += 1; break;
+                case MOR_RIGHT: this.dominants[3] += 1; break;
+                case BACKWARD: this.dominants[4] += 1; break;
+                case MOR_LEFT: this.dominants[5] += 1; break;
+                case LEFT: this.dominants[6] += 1; break;
+                case LIT_LEFT: this.dominants[7] += 1; break;
+            }
+        }
+    }
+
+    public void setDescendant(boolean descendant) {
+        isDescendant = descendant;
+    }
+
+    public boolean isDescendant() {
+        return isDescendant;
     }
 
     public int getDayLiving() {
@@ -113,13 +149,13 @@ public class Animal extends AbstractWorldElem
         dayLiving += 1;
         Vector2d newPosition = map.whereToMoveTo(this.position.add(direction.toUnitVector()));
         MoveDirection rotation = this.rotate();
-        if (map.canMoveTo(newPosition) && (rotation == MoveDirection.FORWARD))
+        if (map.canMoveTo(newPosition) && (rotation == FORWARD))
         {
             this.energy = this.energy - this.map.getMoveEnergy();
             positionChanged(this.position, newPosition);
             this.position = newPosition;
         }
-        else if (rotation != MoveDirection.FORWARD)this.energy = this.energy - this.map.getRotateEnergy();
+        else if (rotation != FORWARD)this.energy = this.energy - this.map.getRotateEnergy();
 
         if (this.energy <= 0) this.reportDeadPossibility(this.position);
     }

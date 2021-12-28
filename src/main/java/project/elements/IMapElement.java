@@ -1,7 +1,6 @@
 package project.elements;
 
-import project.IPositionChangeObserver;
-import project.maps.IWorldMap;
+import project.maps.IPositionChangeObserver;
 import project.orientation.Vector2d;
 
 public interface IMapElement
@@ -10,5 +9,4 @@ public interface IMapElement
 
     void addObserver(IPositionChangeObserver observer);
 
-    void removeObserver(IPositionChangeObserver observer);
 }

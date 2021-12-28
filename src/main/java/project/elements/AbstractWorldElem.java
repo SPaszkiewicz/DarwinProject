@@ -2,14 +2,14 @@ package project.elements;
 
 import project.orientation.Vector2d;
 import project.maps.IWorldMap;
-import project.IPositionChangeObserver;
+import project.maps.IPositionChangeObserver;
 import java.util.LinkedList;
 
 abstract class AbstractWorldElem implements IMapElement
 {
     protected Vector2d position;
     protected IWorldMap map;
-    protected final LinkedList<IPositionChangeObserver> observers = new LinkedList<IPositionChangeObserver>();
+    protected final LinkedList<IPositionChangeObserver> observers = new LinkedList<>();
     public AbstractWorldElem(Vector2d position, IWorldMap map)
     {
         this.position = position;

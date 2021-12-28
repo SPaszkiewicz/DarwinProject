@@ -9,8 +9,9 @@ public class Options
     private final int rotateEnergy;
     private final int plantEnergy;
     private final float jungleRatio;
+    private final int amountOfAnimals;
 
-    public Options(int width, int heigh, int startEnergy, int moveEnergy, int rotateEnergy, int plantEnergy, float jungleRatio) {
+    public Options(int width, int heigh, int startEnergy, int moveEnergy, int rotateEnergy, int plantEnergy, float jungleRatio, int amountOfAnimals) {
         this.width = width;
         this.heigh = heigh;
         this.startEnergy = startEnergy;
@@ -18,6 +19,7 @@ public class Options
         this.rotateEnergy = rotateEnergy;
         this.plantEnergy = plantEnergy;
         this.jungleRatio = jungleRatio;
+        this.amountOfAnimals = amountOfAnimals;
     }
 
     @Override
@@ -59,5 +61,9 @@ public class Options
 
     public float getJungleRatio() {
         return jungleRatio;
+    }
+
+    public int getAmountOfAnimals() {
+        return amountOfAnimals;
     }
 }

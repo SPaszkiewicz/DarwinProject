@@ -1,4 +1,4 @@
-package project;
+package project.maps;
 import project.elements.Animal;
 import project.elements.IMapElement;
 import project.orientation.Vector2d;
