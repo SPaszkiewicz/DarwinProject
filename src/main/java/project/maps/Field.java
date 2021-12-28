@@ -47,10 +47,6 @@ public class Field
         this.elementsOnField.remove(element);
     }
 
-    public  boolean isInField(IMapElement element)
-    {
-        return this.elementsOnField.contains(element);
-    }
 
     public  boolean isFieldEmpty()
     {

@@ -1,4 +1,4 @@
-package project;
+package project.elements;
 
 import project.orientation.MoveDirection;
 

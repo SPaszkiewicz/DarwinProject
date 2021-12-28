@@ -41,7 +41,7 @@ public class Steppe implements IRegion
         {
             for (int j = leftCorner.getY(); j < rightCorner.getY()+1; j += 1)
             {
-                if (inRegion(new Vector2d(i, j)) && !this.map.isOccupied(new Vector2d(i, j))) {
+                if (inRegion(new Vector2d(i, j)) && this.map.isOccupied(new Vector2d(i, j))) {
                     consideredVectors.add(new Vector2d(i, j));
                 }
             }
