@@ -11,3 +11,9 @@ Wybierasz rozmiar mapy, to jak dużo energii mają twoje zwierzaki, to jak szybk
 
 Program pozwala na wybranie sobie ulubienca, oby nic mu się nie stało. Na szczeście jeśli coś pójdzie nie tak, to do swojego świata możesz dodać 
 szczypte <i><b>:star:magii:star:</b></i>, które uratuje cześć zwierząt. Pamiętaj jednak, że życie (szczególnie to) to nie bajka i tak jak zwykle masz wyłącznie 3 życzenia!
+
+# Symulacja
+
+<p align="center">
+<img src="symulacja.png"/>
+</p>
